@@ -2,9 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // ✅ Tomcat details (adjust path if needed)
-        TOMCAT_PATH = 'C:\\Program Files\\Apache Software Foundation\\Tomcat9\\webapps'
+        // Tomcat details 👇
+        TOMCAT_USER = 'admin'
+        TOMCAT_PASS = 'admin'
+        TOMCAT_HOST = 'http://localhost:8080'
         WAR_NAME = 'hospital.war'
+        TOMCAT_PATH = 'C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps'
     }
 
     stages {
@@ -26,15 +29,13 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                echo '🚀 Deploying WAR to Tomcat (Windows)...'
-                dir('hospital-backend-jenkins-main\\target') {
+                echo '🚀 Deploying WAR to Tomcat server...'
+                dir('hospital-backend-jenkins-main/target') {
                     bat """
-                    echo Removing old deployment...
-                    del "%TOMCAT_PATH%\\hospital.war"
-                    rmdir /s /q "%TOMCAT_PATH%\\hospital"
-                    
-                    echo Copying new WAR file...
-                    copy "%WAR_NAME%" "%TOMCAT_PATH%"
+                    echo Deleting old WAR...
+                    del "%TOMCAT_PATH%\\%WAR_NAME%" || echo No previous WAR found
+                    echo Copying new WAR...
+                    copy "%WAR_NAME%" "%TOMCAT_PATH%\\" /Y
                     """
                 }
             }
@@ -42,8 +43,8 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                echo '🔍 Verifying deployment...'
-                bat 'curl -I http://localhost:8080/hospital || echo "⚠️ Application not reachable yet!"'
+                echo '🔍 Checking deployment status...'
+                bat 'curl -I http://localhost:8080/hospital || echo "Check failed"'
             }
         }
     }
