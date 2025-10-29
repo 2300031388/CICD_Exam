@@ -1,0 +1,11 @@
+# Ignore Eclipse and system files
+*.log
+.metadata/
+.settings/
+bin/
+target/
+.idea/
+*.iml
+*.class
+*.zip
+.DS_Store
