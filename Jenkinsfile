@@ -2,12 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Tomcat details 👇
-        TOMCAT_USER = 'admin'
-        TOMCAT_PASS = 'admin'
-        TOMCAT_HOST = 'http://localhost:8080'
-        WAR_NAME = 'hospital.war'
+        // ✅ Tomcat Configuration
         TOMCAT_PATH = 'C:\\Program Files\\Apache Software Foundation\\Tomcat 9.0\\webapps'
+        WAR_NAME = 'hospital.war'
     }
 
     stages {
@@ -31,12 +28,18 @@ pipeline {
             steps {
                 echo '🚀 Deploying WAR to Tomcat server...'
                 dir('hospital-backend-jenkins-main/target') {
-                    bat """
+                    bat '''
                     echo Deleting old WAR...
-                    del "%TOMCAT_PATH%\\%WAR_NAME%" || echo No previous WAR found
-                    echo Copying new WAR...
-                    copy "%WAR_NAME%" "%TOMCAT_PATH%\\" /Y
-                    """
+                    del "%TOMCAT_PATH%\\hospital.war" || echo No previous WAR found
+
+                    echo Renaming and copying new WAR...
+                    ren hospital-1.0.0.war hospital.war
+
+                    echo Copying WAR to Tomcat folder...
+                    copy "hospital.war" "%TOMCAT_PATH%" /Y
+
+                    echo ✅ WAR Deployed Successfully!
+                    '''
                 }
             }
         }
@@ -51,10 +54,10 @@ pipeline {
 
     post {
         success {
-            echo '🎉 Deployment completed successfully!'
+            echo '🎉 Deployment completed successfully! Tomcat should auto-deploy the WAR!'
         }
         failure {
-            echo '❌ Deployment failed. Check logs!'
+            echo '❌ Deployment failed. Check logs or WAR copy step!'
         }
     }
 }
